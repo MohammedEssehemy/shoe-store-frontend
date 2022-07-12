@@ -1,5 +1,8 @@
+use web_sys::console;
 use web_sys::HtmlInputElement;
 use yew::{events::Event, html, Component, Context, Html, Properties, TargetCast};
+mod api;
+mod models;
 enum Msg {
     AddOne,
     SubtractOne,
@@ -56,6 +59,20 @@ impl Component for CounterComponent {
                 return false;
             }
         }
+    }
+
+    fn rendered(&mut self, _ctx: &Context<Self>, first_render: bool) {
+        if !first_render {
+            return;
+        }
+        console::log_1(&String::from("before spawn").into());
+        wasm_bindgen_futures::spawn_local(async move {
+            console::log_1(&String::from("before API").into());
+            let result = api::list_product().await.unwrap();
+            console::log_1(&format!("{:#?}", result).into());
+            console::log_1(&String::from("after API").into());
+        });
+        console::log_1(&String::from("after spawn").into());
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
